@@ -7,66 +7,66 @@ export default defineComponent({
     AppBasket,
   },
   setup() {
-    const openBasket = ref(false)
-    const optionBasket = () => {
-      openBasket.value = !openBasket.value
+    const isBasketOpen = ref(false)
+    const toggleBasket = () => {
+      isBasketOpen.value = !isBasketOpen.value
     }
 
-    const basket = ref([])
-    const items = ref([
+    const basketItems = ref([])
+    const availableItems = ref([
       {
         id: 1,
-        name: 'iphone',
+        name: 'iPhone',
         price: 300,
       },
       {
         id: 2,
-        name: 'xiaomi',
+        name: 'Xiaomi',
         price: 200,
       },
       {
         id: 3,
-        name: 'huawei',
+        name: 'Huawei',
         price: 100,
       },
     ])
 
-    const pushBasket = (item) => {
-      const upBasket = basket.value.find((basketItem) => basketItem.id === item.id)
-      if (upBasket) {
-        upBasket.question += 1
+    const addToBasket = (item) => {
+      const existingItem = basketItems.value.find((basketItem) => basketItem.id === item.id)
+      if (existingItem) {
+        existingItem.quantity += 1
       } else {
-        basket.value.push({
+        basketItems.value.push({
           id: item.id,
           name: item.name,
           price: item.price,
-          question: 1,
+          quantity: 1,
         })
       }
     }
 
-    const result = () => {
-      return basket.value.reduce((total, item) => total + item.price * item.question, 0)
+    const calculateTotal = () => {
+      return basketItems.value.reduce((total, item) => total + item.price * item.quantity, 0)
     }
 
-    const prev = (item, chart) => {
-      const current = basket.value.find((pol) => pol.id === item.id)
-      if (current) {
-        current.question += chart
-        if (current.question <= 0) {
-          basket.value = basket.value.filter((pol) => pol.id !== item.id)
+    const updateItemQuantity = (item, change) => {
+      const currentItem = basketItems.value.find((basketItem) => basketItem.id === item.id)
+      if (currentItem) {
+        currentItem.quantity += change
+        if (currentItem.quantity <= 0) {
+          basketItems.value = basketItems.value.filter((basketItem) => basketItem.id !== item.id)
         }
       }
     }
 
     return {
-      openBasket,
-      optionBasket,
-      pushBasket,
-      result,
-      basket,
-      items,
-      prev,
+      isBasketOpen,
+      toggleBasket,
+      addToBasket,
+      calculateTotal,
+      basketItems,
+      availableItems,
+      updateItemQuantity,
     }
   },
 })
@@ -74,20 +74,20 @@ export default defineComponent({
 
 <template>
   <div>
-    <div @click="optionBasket">basket</div>
-    <div v-for="item in items" :key="item">
-      {{ item.name }}-{{ item.price }}
-      <div @click="pushBasket(item)">Купить</div>
+    <div @click="toggleBasket">Корзина</div>
+    <div v-for="item in availableItems" :key="item.id">
+      {{ item.name }} - {{ item.price }}₽
+      <div @click="addToBasket(item)">Купить</div>
     </div>
   </div>
-  <div class="exam__basket" :class="{ 'exam-basket--active': openBasket }">
-    <AppBasket :basket="basket" @prev="prev" />
-    {{ result() }}
+  <div class="basket" :class="{ 'basket--active': isBasketOpen }">
+    <AppBasket :basket="basketItems" @updateQuantity="updateItemQuantity" />
+    Итого: {{ calculateTotal() }}₽
   </div>
 </template>
 
 <style scoped>
-.exam__basket {
+.basket {
   position: fixed;
   width: 300px;
   background-color: aqua;
@@ -96,7 +96,7 @@ export default defineComponent({
   height: 100%;
 }
 
-.exam-basket--active {
+.basket--active {
   right: -300px;
 }
 </style>

@@ -1,3 +1,4 @@
+=
 <script>
 import { defineComponent } from 'vue'
 
@@ -7,24 +8,24 @@ export default defineComponent({
   },
 
   setup(__, { emit }) {
-    const prev = (item, chart) => {
-      emit('prev', item, chart)
+    const updateQuantity = (item, change) => {
+      emit('updateQuantity', item, change)
     }
 
     return {
-      prev,
+      updateQuantity,
     }
   },
 })
 </script>
 
 <template>
-  <div v-for="item in basket" :key="item">
-    {{ item.name }} {{ item.price }}
-    <div class="exam__basket">
-      <div @click="prev(item, -1)">-</div>
-      <div>{{ item.question }}</div>
-      <div @click="prev(item, 1)">+</div>
+  <div v-for="item in basket" :key="item.id">
+    {{ item.name }} {{ item.price }}₽
+    <div class="basket-item">
+      <div @click="updateQuantity(item, -1)">-</div>
+      <div>{{ item.quantity }}</div>
+      <div @click="updateQuantity(item, 1)">+</div>
     </div>
   </div>
 </template>
